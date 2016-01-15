@@ -4,8 +4,8 @@
 /// <reference path="OptimizationResult.ts" />
 /// <reference path="Essence.ts" />
 
-function OptimizeGrades(maxSeconds: number, references: IImplantReferences, minEssence: number, maxAvailability: number, allowedGrades: IImplantGrade[], biocompatibilityAllowed: boolean, biocompatibilityCost: number, prototypeAllowed: boolean, prototypeCost: number) {
-    references.Initialize();
+function OptimizeGrades(maxSeconds: number, referencesWithoutAdapsin: IImplantReferences, minEssence: number, maxAvailability: number, allowedGrades: IImplantGrade[], biocompatibilityAllowed: boolean, biocompatibilityCost: number, prototypeAllowed: boolean, prototypeCost: number, adapsinAllowed: boolean, adapsinReference: IImplantReference) {
+    referencesWithoutAdapsin.Initialize();
 
     var maxEssenceUsed = new EssenceLoss(6 - minEssence);
 
@@ -24,13 +24,23 @@ function OptimizeGrades(maxSeconds: number, references: IImplantReferences, minE
         withPrototypes = [false];
     }
 
+    var adapsinImplants: IImplantReferences;
+    if (adapsinAllowed && adapsinReference.totalBaseAvailability <= maxAvailability) {
+        adapsinImplants = referencesWithoutAdapsin.Clone();
+        adapsinImplants.AddImplant(adapsinReference);
+    }
+
     var optimizers: IImplantsOptimizer[] = [];
     for (var i = 0; i < withPrototypes.length; i++) {
         var withPrototype = withPrototypes[i];
         for (var j = 0; j < biocompatibilities.length; j++) {
             var biocompatibility = biocompatibilities[j];
-            var opt = new ImplantsOptimizer(references, maxEssenceUsed, biocompatibility, withPrototype, prototypeCost, biocompatibilityCost);
+            var opt = new ImplantsOptimizer(referencesWithoutAdapsin, maxEssenceUsed, biocompatibility, withPrototype, false, prototypeCost, biocompatibilityCost);
             optimizers.push(opt);
+            if (adapsinAllowed) {
+                var adapsinOpt = new ImplantsOptimizer(adapsinImplants, maxEssenceUsed, biocompatibility, withPrototype, true, prototypeCost, biocompatibilityCost);
+                optimizers.push(adapsinOpt);
+            }
         }
     }
 

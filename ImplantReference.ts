@@ -60,8 +60,12 @@ class ImplantReference implements IImplantReference {
     isBioware: boolean;
     isCultured: boolean;
     children: ISubImplantReference[];
+    initialized: boolean;
 
     AddChild(child: ISubImplantReference): void {
+        if (this.initialized) {
+            throw new Error("cannot add a subimplant to an initialized implant");
+        }
         if (this.amount > 1) {
             throw new Error("cannot have multiple instances of the same implant with subimplants");
         }
@@ -71,6 +75,9 @@ class ImplantReference implements IImplantReference {
     }
 
     Initialize(): void {
+        if (this.initialized) {
+            return;
+        }
         var previousImplantCost: IImplantCost = null;
         for (var i = 0; i < this.allowedGrades.length; i++) {
             var implantCost = new ImplantCost(this.allowedGrades[i], this.totalBaseCost, this.baseEssence, this.totalBaseAvailability, this.type);
@@ -84,9 +91,10 @@ class ImplantReference implements IImplantReference {
             this.upgrades.push(implantCost);
         }
         if (this.upgrades.length == 0) {
-            throw new Error("failed: implant " + this.name + " or one of its contained implants has a too high availability even with the lowest allowed grade");
+            throw new Error("Failed: implant " + this.name + " or one of its contained implants has a too high availability even with the lowest allowed grade");
         }
         this.maxCostsIndex = this.upgrades.length - 1;
+        this.initialized = true;
     }
 
 
@@ -106,6 +114,7 @@ class ImplantReference implements IImplantReference {
     }
 
     constructor(row: number, name: string, essence: number, availability: number, cost: number, type: implantTypesEnum, cultured: boolean, allowedGradesFactory: IAllowedGradesFactory, minEssence: number, maxAvailability: number) {
+        this.initialized = false;
         this.amount = 1;
         this.rows = [];
         this.rows.push(row);

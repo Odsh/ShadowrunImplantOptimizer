@@ -4,29 +4,49 @@
 /// <reference path="AllowedGradesFactory.ts" />
 /// <reference path="ImplantGrade.ts" />
 /// <reference path="Configuration.ts" />
+/// <reference path="ImplantCost.ts" />
 
 function Test1() {
     var result = TestOptimization(0.001, 40, true, true);
 }
 
+function TestEssenceCosts(essence: number): IImplantCost[] {
+    var allowedGradesFactory = GetAllowedGradesFactory();
+    var testCyberImplant = new ImplantReference(1, "Test implant", essence, 0, 1000000, implantTypesEnum.CYBERWARE, false, allowedGradesFactory, 0.001, 40);
+    testCyberImplant.Initialize();
+    var upgrades = testCyberImplant.upgrades;
+    return upgrades;
+}
+
 function TestGetBestUpgrade() {
-    var implantReferences = CreateImplantReferences(0.001, 40);
-    var config = new InitialConfiguration(implantReferences, new EssenceLoss(5.99), biocompatibilityEnum.CYBERWARE, true, 50000, 25000);
+    var allowedGradesFactory = GetAllowedGradesFactory();
+    var implantReferences = CreateImplantReferences(0.001, 40, allowedGradesFactory);
+    var config = new InitialConfiguration(implantReferences, new EssenceLoss(5.99), biocompatibilityEnum.CYBERWARE, false, true, 50000, 25000);
     return config.GetBestUpgradeNotIn([]);
 }
 
 function TestOptimization(minEssence: number, maxAvailability: number, biocompatibilityAllowed: boolean, prototypeAllowed: boolean) {
-    var implantReferences = CreateImplantReferences(minEssence, maxAvailability);
-    return OptimizeGrades(5, implantReferences, minEssence, maxAvailability, allowedGrades, biocompatibilityAllowed, 25000, prototypeAllowed, 50000);
+    var allowedGradesFactory = GetAllowedGradesFactory();
+    var adapsinImplant = GetAdapsinImplant(minEssence, maxAvailability, allowedGradesFactory);
+    var implantReferences = CreateImplantReferences(minEssence, maxAvailability, allowedGradesFactory);
+    return OptimizeGrades(5, implantReferences, minEssence, maxAvailability, allowedGrades, biocompatibilityAllowed, 25000, prototypeAllowed, 50000, false, adapsinImplant);
+}
+
+function TestOptimizationWithAdapsin(minEssence: number, maxAvailability: number, biocompatibilityAllowed: boolean, prototypeAllowed: boolean) {
+    var allowedGradesFactory = GetAllowedGradesFactory();
+    var adapsinImplant = GetAdapsinImplant(minEssence, maxAvailability, allowedGradesFactory);
+    var implantReferences = CreateImplantReferences(minEssence, maxAvailability, allowedGradesFactory);
+    return OptimizeGrades(5, implantReferences, minEssence, maxAvailability, allowedGrades, biocompatibilityAllowed, 25000, prototypeAllowed, 50000, true, adapsinImplant);
 }
 
 function TestSimplifiedOptimization(minEssence: number, maxAvailability: number, biocompatibilityAllowed: boolean, prototypeAllowed: boolean) {
-    var implantReferences = CreateSimplifiedImplantReferences(minEssence, maxAvailability);
-    return OptimizeGrades(5, implantReferences, minEssence, maxAvailability, allowedGrades, biocompatibilityAllowed, 25000, prototypeAllowed, 50000);
+    var allowedGradesFactory = GetAllowedGradesFactory();
+    var adapsinImplant = GetAdapsinImplant(minEssence, maxAvailability, allowedGradesFactory);
+    var implantReferences = CreateSimplifiedImplantReferences(minEssence, maxAvailability, allowedGradesFactory);
+    return OptimizeGrades(5, implantReferences, minEssence, maxAvailability, allowedGrades, biocompatibilityAllowed, 25000, prototypeAllowed, 50000, false, adapsinImplant);
 }
 
-function CreateSimplifiedImplantReferences(minEssence: number, maxAvailability: number): IImplantReferences {
-    var allowedGradesFactory = new AllowedGradesFactory(allowedGrades, genewareAllowedGrades, culturedBiowareMinAllowedGrades, usedImplantGrade);
+function CreateSimplifiedImplantReferences(minEssence: number, maxAvailability: number, allowedGradesFactory: IAllowedGradesFactory): IImplantReferences {
 
     var implantReferences = new ImplantReferences();
 
@@ -62,8 +82,15 @@ function CreateSimplifiedImplantReferences(minEssence: number, maxAvailability: 
     return implantReferences;
 }
 
-function CreateImplantReferences(minEssence: number, maxAvailability: number): IImplantReferences {
-    var allowedGradesFactory = new AllowedGradesFactory(allowedGrades, genewareAllowedGrades, culturedBiowareMinAllowedGrades, usedImplantGrade);
+function GetAdapsinImplant(minEssence: number, maxAvailability: number, allowedGradesFactory: IAllowedGradesFactory): IImplantReference {
+    return new ImplantReference(44, "Adapsin", 0.2, 16, 30000, implantTypesEnum.GENEWARE, false, allowedGradesFactory, minEssence, maxAvailability);
+}
+
+function GetAllowedGradesFactory() {
+    return new AllowedGradesFactory(allowedGrades, genewareAllowedGrades, culturedBiowareMinAllowedGrades, usedImplantGrade);
+}
+
+function CreateImplantReferences(minEssence: number, maxAvailability: number, allowedGradesFactory: IAllowedGradesFactory): IImplantReferences {
 
     var implantReferences = new ImplantReferences();
 

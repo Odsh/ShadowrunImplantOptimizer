@@ -19,6 +19,7 @@ interface IOptimizationResult {
     costEfficiencyPercent: number;
     biocompatibility: biocompatibilityEnum;
     withPrototype: boolean;
+    withAdapsin: boolean;
     grades: string[];
     searchReports: SearchReport[];
 }
@@ -31,6 +32,7 @@ class OptimizationResult implements IOptimizationResult {
     costEfficiencyPercent: number;
     biocompatibility: biocompatibilityEnum;
     withPrototype: boolean;
+    withAdapsin: boolean;
     grades: string[];
     searchReports: SearchReport[];
 
@@ -46,14 +48,19 @@ class OptimizationResult implements IOptimizationResult {
         var config = currentBest.config;
         this.biocompatibility = config.biocompatibility;
         this.withPrototype = config.withPrototype;
+        this.withAdapsin = config.withAdapsin;
         this.cost = config.cost;
         this.qualityCost = config.qualityCost;
         this.essenceCost = config.essenceUsed;
-        this.costEfficiencyPercent = 100 * config.cost / config.implantReferences.totalBaseCost;
+        var totalBaseCost = config.implantReferences.totalBaseCost;
+        var implants = config.implantReferences.implants;
+        if (this.withAdapsin) {
+            totalBaseCost -= this.GetAdapsinCost(implants);
+        }
+        this.costEfficiencyPercent = 100 * config.cost / totalBaseCost;
 
         var gradeResults: IGradeResult[] = [];
         var upgrades = config.upgrades;
-        var implants = config.implantReferences.implants;
         for (var i = 0; i < upgrades.length; i++) {
 
             var implantUpgrades = upgrades[i];
@@ -81,6 +88,16 @@ class OptimizationResult implements IOptimizationResult {
                 this.grades.push(standardGrade);
             }
             this.grades.push(gradeResult.grade);
+        }
+    }
+
+    GetAdapsinCost(implants: IImplantReference[]): number {
+        for (var i = 0; i < implants.length; i++) {
+            var implant = implants[i];
+            if (implant.name == "Adapsin") {
+                return implant.totalBaseCost;
+                break;
+            }
         }
     }
 }

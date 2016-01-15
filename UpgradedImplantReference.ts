@@ -6,13 +6,15 @@ class UpgradedImplantReference implements IComparable {
     implantReference: IImplantReference;
     upgrades: number[];
     biocompatibility: biocompatibilityEnum;
+    withAdapsin: boolean;
     implantIndex: number;
 
-    constructor(biocompatibility: biocompatibilityEnum, implantReference: IImplantReference, implantIndex: number, upgrades: number[]) {
+    constructor(biocompatibility: biocompatibilityEnum, withAdapsin: boolean, implantReference: IImplantReference, implantIndex: number, upgrades: number[]) {
         this.implantReference = implantReference;
         this.upgrades = upgrades;
         this.biocompatibility = biocompatibility;
         this.implantIndex = implantIndex;
+        this.withAdapsin = withAdapsin;
     }
 
     Downgrade(subIndex: number): UpgradedImplantReference {
@@ -25,7 +27,7 @@ class UpgradedImplantReference implements IComparable {
                 newUpgrades.push(this.upgrades[i]);
             }
         }
-        return new UpgradedImplantReference(this.biocompatibility, this.implantReference, this.implantIndex, newUpgrades);
+        return new UpgradedImplantReference(this.biocompatibility, this.withAdapsin, this.implantReference, this.implantIndex, newUpgrades);
     }
 
     DownGradeMaxEssenceLoss(): IEssenceLoss {
@@ -37,7 +39,7 @@ class UpgradedImplantReference implements IComparable {
                 continue;
             }
             lastUpgrade = upgrade;
-            var essenceLoss = this.implantReference.upgrades[upgrade].EssenceDelta(this.biocompatibility).Absolute();
+            var essenceLoss = this.implantReference.upgrades[upgrade].EssenceDelta(this.biocompatibility, this.withAdapsin).Absolute();
             if (essenceLoss.GreaterThan(result)) {
                 result = essenceLoss;
             }

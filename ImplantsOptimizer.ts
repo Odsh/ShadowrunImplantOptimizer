@@ -14,6 +14,7 @@ interface IImplantsOptimizer {
     maxEssenceLoss: IEssenceLoss;
     bioCompatibility: biocompatibilityEnum;
     withPrototype: boolean;
+    withAdapsin: boolean;
 
     Optimize(maxSeconds: number): IOptimizationResult;
 }
@@ -24,6 +25,7 @@ class ImplantsOptimizer implements IImplantsOptimizer {
     maxEssenceLoss: IEssenceLoss;
     bioCompatibility: biocompatibilityEnum;
     withPrototype: boolean;
+    withAdapsin: boolean;
 
     prototypeCost: number;
     biocompatibilityCost: number;
@@ -35,7 +37,7 @@ class ImplantsOptimizer implements IImplantsOptimizer {
     alternativeSolutionsExplored: number;
     alternativeFailuresExplored: number;
 
-    constructor(implantReferences: IImplantReferences, maxEssenceLoss: IEssenceLoss, bioCompatibility: biocompatibilityEnum, withPrototype: boolean, prototypeCost: number, biocompatibilityCost: number) {
+    constructor(implantReferences: IImplantReferences, maxEssenceLoss: IEssenceLoss, bioCompatibility: biocompatibilityEnum, withPrototype: boolean, withAdapsin: boolean, prototypeCost: number, biocompatibilityCost: number) {
         this.currentBestSolution = null;
         this.implantReferences = implantReferences;
         this.maxEssenceLoss = maxEssenceLoss;
@@ -46,6 +48,7 @@ class ImplantsOptimizer implements IImplantsOptimizer {
         this.searchReports = [];
         this.alternativeSolutionsExplored = 0;
         this.alternativeFailuresExplored = 0;
+        this.withAdapsin = withAdapsin;
     }
 
     SetBestIfNeeded(config: IConfiguration): boolean {
@@ -214,8 +217,11 @@ class ImplantsOptimizer implements IImplantsOptimizer {
     }
 
     Optimize(maxSeconds: number): IOptimizationResult {
-        var configuration: IConfiguration = new InitialConfiguration(this.implantReferences, this.maxEssenceLoss, this.bioCompatibility, this.withPrototype, this.prototypeCost, this.biocompatibilityCost);
+        var configuration: IConfiguration = new InitialConfiguration(this.implantReferences, this.maxEssenceLoss, this.bioCompatibility, this.withPrototype, this.withAdapsin, this.prototypeCost, this.biocompatibilityCost);
         var solution = this.SprintToFirstFringeSolutionWithFixedUpgrades(configuration, []);
+        if (solution == null) {
+            return new OptimizationResult(null, null);
+        }
         this.SetBestIfNeeded(solution);
         this.ImproveBest(maxSeconds);
         return new OptimizationResult(this.currentBestSolution, this.searchReports);

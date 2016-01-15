@@ -7,7 +7,6 @@
 /// <reference path="Essence.ts" />
 /// <reference path="SortedList.ts" />
 /// <reference path="Dictionary.ts" />
-/// <reference path="ConfigKey.ts" />
 /// <reference path="UpgradedImplantReference.ts" />
 
 class UpgradeIdentifier {
@@ -40,6 +39,7 @@ interface IConfiguration extends IComparable {
     qualityCost: number;
     biocompatibility: biocompatibilityEnum;
     withPrototype: boolean;
+    withAdapsin: boolean;
     upgrades: number[][];
     maxEssenceLoss: IEssenceLoss;
 
@@ -57,6 +57,7 @@ class ConfigurationBase implements IConfiguration {
     qualityCost: number;
     biocompatibility: biocompatibilityEnum;
     withPrototype: boolean;
+    withAdapsin: boolean;
     upgrades: number[][];
     maxUpgradeIndex: number;
     maxEssenceLoss: IEssenceLoss;
@@ -66,7 +67,7 @@ class ConfigurationBase implements IConfiguration {
         for (var i = 0; i < this.implantReferences.implants.length; i++) {
             var implant = this.implantReferences.implants[i];
             var upgrades = this.upgrades[i];
-            InsertInSortedList(result, new UpgradedImplantReference(this.biocompatibility, implant, i, upgrades));
+            InsertInSortedList(result, new UpgradedImplantReference(this.biocompatibility, this.withAdapsin, implant, i, upgrades));
         }
         return result;
     }
@@ -88,7 +89,7 @@ class ConfigurationBase implements IConfiguration {
                     continue;
                 }
                 var upgradeCost = implant.upgrades[upgrade];
-                var efficiency = upgradeCost.DownGradeEfficiency(this.biocompatibility);
+                var efficiency = upgradeCost.DownGradeEfficiency(this.biocompatibility, this.withAdapsin);
                 var result = new UpgradeDescription(i, j, efficiency);
                 InsertInSortedList(results, result);
             }
@@ -134,7 +135,7 @@ class ConfigurationBase implements IConfiguration {
                     continue;
                 }
                 var nextUpgradeCost = implant.upgrades[upgrade + 1];
-                var efficiency = nextUpgradeCost.Efficiency(this.biocompatibility, maxEssenceGain, maxBioEssenceGain);
+                var efficiency = nextUpgradeCost.Efficiency(this.biocompatibility, this.withAdapsin, maxEssenceGain, maxBioEssenceGain);
                 if (efficiency > resultEfficiency) {
                     resultEfficiency = efficiency;
                     result = new UpgradeDescription(i, j, efficiency);
@@ -177,6 +178,7 @@ class Configuration extends ConfigurationBase {
         this.cost = configuration.cost;
         this.biocompatibility = configuration.biocompatibility;
         this.withPrototype = configuration.withPrototype;
+        this.withAdapsin = configuration.withAdapsin;
         this.qualityCost = configuration.qualityCost;
         this.maxEssenceLoss = configuration.maxEssenceLoss;
 
@@ -204,7 +206,7 @@ class Configuration extends ConfigurationBase {
 
 class InitialConfiguration extends ConfigurationBase {
 
-    constructor(implantReferences: IImplantReferences, maxEssenceLoss: IEssenceLoss, bioCompatibility: biocompatibilityEnum, withPrototype: boolean, prototypeCost: number, biocompatibilityCost: number) {
+    constructor(implantReferences: IImplantReferences, maxEssenceLoss: IEssenceLoss, bioCompatibility: biocompatibilityEnum, withPrototype: boolean, withAdapsin: boolean, prototypeCost: number, biocompatibilityCost: number) {
         super();
         this.implantReferences = implantReferences;
         this.essenceUsed = new EssenceLoss(0);
@@ -222,6 +224,7 @@ class InitialConfiguration extends ConfigurationBase {
 
         this.biocompatibility = bioCompatibility;
         this.withPrototype = withPrototype;
+        this.withAdapsin = withAdapsin;
 
         this.upgrades = [];
         for (var i = 0; i < implantReferences.implants.length; i++) {
@@ -247,7 +250,7 @@ function UpdateConfiguration(isAnUpgrade: boolean, config: IConfiguration, index
         var upgradeRank = config.upgrades[index][subIndex];
         var upgrade = implantReference.upgrades[upgradeRank];
         config.cost += upgrade.costDelta;
-        var essenceDelta = upgrade.EssenceDelta(config.biocompatibility);
+        var essenceDelta = upgrade.EssenceDelta(config.biocompatibility, config.withAdapsin);
         config.essenceUsed = config.essenceUsed.Add(essenceDelta);
         if (upgrade.isBioware) {
             config.bioEssenceUsed = config.bioEssenceUsed.Add(essenceDelta);
@@ -258,7 +261,7 @@ function UpdateConfiguration(isAnUpgrade: boolean, config: IConfiguration, index
         var upgradeRank = config.upgrades[index][subIndex];
         var previousUpgrade = implantReference.upgrades[upgradeRank + 1];
         config.cost -= previousUpgrade.costDelta;
-        var essenceDelta = previousUpgrade.EssenceDelta(config.biocompatibility);
+        var essenceDelta = previousUpgrade.EssenceDelta(config.biocompatibility, config.withAdapsin);
         config.essenceUsed = config.essenceUsed.Subtract(essenceDelta);
         if (previousUpgrade.isBioware) {
             config.bioEssenceUsed = config.bioEssenceUsed.Subtract(essenceDelta);

@@ -11,6 +11,7 @@ interface IImplantReferences {
     AddImplant(implantReference: IImplantReference): void;
     AddSubImplant(subImplantReference: ISubImplantReference): void;
     Initialize(): void;
+    Clone(): IImplantReferences;
 }
 
 
@@ -26,6 +27,19 @@ class ImplantReferences implements IImplantReferences {
         this.totalBaseCost = 0;
         this.implants = [];
         this.subImplantsWithoutParents = [];
+    }
+
+    Clone(): IImplantReferences {
+        var result = new ImplantReferences();
+        result.totalBaseCost = this.totalBaseCost;
+        result.initialized = this.initialized;
+        for (var i = 0; i < this.implants.length; i++) {
+            result.implants.push(this.implants[i]);
+        }
+        for (var j = 0; j < this.subImplantsWithoutParents.length; j++) {
+            result.subImplantsWithoutParents.push(this.subImplantsWithoutParents[j]);
+        }
+        return result;
     }
 
     AddImplant(implantReference: IImplantReference): void {
@@ -56,9 +70,16 @@ class ImplantReferences implements IImplantReferences {
             this.subImplantsWithoutParents = newSubImplantsWithoutParent;
         }
         this.implants.push(implantReference);
+        if (this.initialized) {
+            implantReference.Initialize();
+        }
     }
 
     AddSubImplant(subImplantReference: ISubImplantReference): void {
+        if (this.initialized) {
+            throw new Error("Cannot add a sub-implant if parent implant has already been initialized");
+        }
+
         this.totalBaseCost += subImplantReference.baseCost;
         for (var i = 0; i < this.implants.length; i++) {
             var implant = this.implants[i];
