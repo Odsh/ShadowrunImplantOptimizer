@@ -1,6 +1,10 @@
 /// <reference path="ImplantGrade.ts" />
 /// <reference path="ImplantType.ts" />
 
+function CreateAllowedGradesFactory(allowedGrades: IImplantGrade[], genewareAllowedGrades: IImplantGrade[], culturedBiowareMinAllowedGrades: IImplantGrade[], culturedBiowareUnauthorizedGrade: IImplantGrade) {
+    return new AllowedGradesFactory(allowedGrades, genewareAllowedGrades, culturedBiowareMinAllowedGrades, culturedBiowareUnauthorizedGrade);
+}
+
 interface IAllowedGradesFactory {
     CreateAllowedGrades(type: implantTypesEnum, cultured: boolean): IImplantGrade[];
 }
