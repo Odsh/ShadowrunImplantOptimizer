@@ -14,6 +14,7 @@ var standardGrade = "Standard";
 interface IOptimizationResult {
     result: optimizationResultEnum;
     cost: number;
+    implantsCost: number;
     qualityCost: number;
     essenceCost: IEssenceLoss;
     remainingEssenceString: string;
@@ -28,6 +29,8 @@ interface IOptimizationResult {
 class OptimizationResult implements IOptimizationResult {
     result: optimizationResultEnum;
     cost: number;
+    implantsCost: number;
+    qualitiesCost: number;
     essenceCost: IEssenceLoss;
     remainingEssenceString: string;
     qualityCost: number;
@@ -53,6 +56,7 @@ class OptimizationResult implements IOptimizationResult {
         this.withAdapsin = config.withAdapsin;
         this.cost = config.cost;
         this.qualityCost = config.qualityCost;
+        this.implantsCost = this.cost - this.qualityCost;
         this.essenceCost = config.RealEssenceUsed();
 
         this.remainingEssenceString = sixEssence.Subtract(this.essenceCost).ToString();
