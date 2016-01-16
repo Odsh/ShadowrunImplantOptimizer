@@ -29,14 +29,14 @@ function TestOptimization(minEssence: number, maxAvailability: number, biocompat
     var allowedGradesFactory = GetAllowedGradesFactory();
     var adapsinImplant = GetAdapsinImplant(minEssence, maxAvailability, allowedGradesFactory);
     var implantReferences = CreateImplantReferences(minEssence, maxAvailability, allowedGradesFactory);
-    return OptimizeGrades(5, implantReferences, minEssence, maxAvailability, allowedGrades, biocompatibilityAllowed, 25000, prototypeAllowed, 50000, false, adapsinImplant);
+    return OptimizeGrades(5, implantReferences, minEssence, maxAvailability, biocompatibilityAllowed, 25000, prototypeAllowed, 50000, false, adapsinImplant);
 }
 
 function TestOptimizationWithAdapsin(minEssence: number, maxAvailability: number, biocompatibilityAllowed: boolean, prototypeAllowed: boolean) {
     var allowedGradesFactory = GetAllowedGradesFactory();
     var adapsinImplant = GetAdapsinImplant(minEssence, maxAvailability, allowedGradesFactory);
     var implantReferences = CreateImplantReferences(minEssence, maxAvailability, allowedGradesFactory);
-    return OptimizeGrades(5, implantReferences, minEssence, maxAvailability, allowedGrades, biocompatibilityAllowed, 25000, prototypeAllowed, 50000, true, adapsinImplant);
+    return OptimizeGrades(5, implantReferences, minEssence, maxAvailability, biocompatibilityAllowed, 25000, prototypeAllowed, 50000, true, adapsinImplant);
 }
 
 function TestOptimizationWithAdapsinInReferences(minEssence: number, maxAvailability: number, biocompatibilityAllowed: boolean, prototypeAllowed: boolean) {
@@ -44,14 +44,14 @@ function TestOptimizationWithAdapsinInReferences(minEssence: number, maxAvailabi
     var adapsinImplant = GetAdapsinImplant(minEssence, maxAvailability, allowedGradesFactory);
     var implantReferences = CreateImplantReferences(minEssence, maxAvailability, allowedGradesFactory);
     implantReferences.AddImplant(adapsinImplant);
-    return OptimizeGrades(5, implantReferences, minEssence, maxAvailability, allowedGrades, biocompatibilityAllowed, 25000, prototypeAllowed, 50000, true, adapsinImplant);
+    return OptimizeGrades(5, implantReferences, minEssence, maxAvailability, biocompatibilityAllowed, 25000, prototypeAllowed, 50000, true, adapsinImplant);
 }
 
 function TestSimplifiedOptimization(minEssence: number, maxAvailability: number, biocompatibilityAllowed: boolean, prototypeAllowed: boolean) {
     var allowedGradesFactory = GetAllowedGradesFactory();
     var adapsinImplant = GetAdapsinImplant(minEssence, maxAvailability, allowedGradesFactory);
     var implantReferences = CreateSimplifiedImplantReferences(minEssence, maxAvailability, allowedGradesFactory);
-    return OptimizeGrades(5, implantReferences, minEssence, maxAvailability, allowedGrades, biocompatibilityAllowed, 25000, prototypeAllowed, 50000, false, adapsinImplant);
+    return OptimizeGrades(5, implantReferences, minEssence, maxAvailability, biocompatibilityAllowed, 25000, prototypeAllowed, 50000, false, adapsinImplant);
 }
 
 function CreateSimplifiedImplantReferences(minEssence: number, maxAvailability: number, allowedGradesFactory: IAllowedGradesFactory): IImplantReferences {

@@ -4,7 +4,7 @@
 /// <reference path="OptimizationResult.ts" />
 /// <reference path="Essence.ts" />
 
-function OptimizeGrades(maxSeconds: number, references: IImplantReferences, minEssence: number, maxAvailability: number, allowedGrades: IImplantGrade[], biocompatibilityAllowed: boolean, biocompatibilityCost: number, prototypeAllowed: boolean, prototypeCost: number, adapsinAllowed: boolean, adapsinReference: IImplantReference) {
+function OptimizeGrades(maxSeconds: number, references: IImplantReferences, minEssence: number, maxAvailability: number, biocompatibilityAllowed: boolean, biocompatibilityCost: number, prototypeAllowed: boolean, prototypeCost: number, adapsinAllowed: boolean, adapsinReference: IImplantReference): IOptimizationResult {
 
     var referencesWithAdapsin: IImplantReferences;
     var referencesWithoutAdapsin: IImplantReferences;
