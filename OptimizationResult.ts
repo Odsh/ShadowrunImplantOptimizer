@@ -51,7 +51,7 @@ class OptimizationResult implements IOptimizationResult {
         this.withAdapsin = config.withAdapsin;
         this.cost = config.cost;
         this.qualityCost = config.qualityCost;
-        this.essenceCost = config.essenceUsed;
+        this.essenceCost = config.RealEssenceUsed();
         var totalBaseCost = config.implantReferences.totalBaseCost;
         var implants = config.implantReferences.implants;
         if (this.withAdapsin) {

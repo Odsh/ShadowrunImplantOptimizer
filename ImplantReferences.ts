@@ -12,6 +12,7 @@ interface IImplantReferences {
     AddSubImplant(subImplantReference: ISubImplantReference): void;
     Initialize(): void;
     Clone(): IImplantReferences;
+    CloneWithout(implantName: string): IImplantReferences;
 }
 
 
@@ -35,6 +36,25 @@ class ImplantReferences implements IImplantReferences {
         result.initialized = this.initialized;
         for (var i = 0; i < this.implants.length; i++) {
             result.implants.push(this.implants[i]);
+        }
+        for (var j = 0; j < this.subImplantsWithoutParents.length; j++) {
+            result.subImplantsWithoutParents.push(this.subImplantsWithoutParents[j]);
+        }
+        return result;
+    }
+
+    CloneWithout(implantName: string): IImplantReferences {
+        var result = new ImplantReferences();
+        result.totalBaseCost = this.totalBaseCost;
+        result.initialized = this.initialized;
+        for (var i = 0; i < this.implants.length; i++) {
+            var implant = this.implants[i];
+            if (implant.name == implantName) {
+                result.totalBaseCost -= implant.totalBaseCost;
+            }
+            else {
+                result.implants.push(implant);
+            }
         }
         for (var j = 0; j < this.subImplantsWithoutParents.length; j++) {
             result.subImplantsWithoutParents.push(this.subImplantsWithoutParents[j]);

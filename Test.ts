@@ -39,6 +39,14 @@ function TestOptimizationWithAdapsin(minEssence: number, maxAvailability: number
     return OptimizeGrades(5, implantReferences, minEssence, maxAvailability, allowedGrades, biocompatibilityAllowed, 25000, prototypeAllowed, 50000, true, adapsinImplant);
 }
 
+function TestOptimizationWithAdapsinInReferences(minEssence: number, maxAvailability: number, biocompatibilityAllowed: boolean, prototypeAllowed: boolean) {
+    var allowedGradesFactory = GetAllowedGradesFactory();
+    var adapsinImplant = GetAdapsinImplant(minEssence, maxAvailability, allowedGradesFactory);
+    var implantReferences = CreateImplantReferences(minEssence, maxAvailability, allowedGradesFactory);
+    implantReferences.AddImplant(adapsinImplant);
+    return OptimizeGrades(5, implantReferences, minEssence, maxAvailability, allowedGrades, biocompatibilityAllowed, 25000, prototypeAllowed, 50000, true, adapsinImplant);
+}
+
 function TestSimplifiedOptimization(minEssence: number, maxAvailability: number, biocompatibilityAllowed: boolean, prototypeAllowed: boolean) {
     var allowedGradesFactory = GetAllowedGradesFactory();
     var adapsinImplant = GetAdapsinImplant(minEssence, maxAvailability, allowedGradesFactory);
