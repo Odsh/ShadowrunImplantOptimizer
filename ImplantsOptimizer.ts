@@ -36,6 +36,8 @@ class ImplantsOptimizer implements IImplantsOptimizer {
     startTime: number;
     alternativeSolutionsExplored: number;
     alternativeFailuresExplored: number;
+    timeLimit: number;
+    timeWasUp: boolean;
 
     constructor(implantReferences: IImplantReferences, maxEssenceLoss: IEssenceLoss, bioCompatibility: biocompatibilityEnum, withPrototype: boolean, withAdapsin: boolean, prototypeCost: number, biocompatibilityCost: number) {
         this.currentBestSolution = null;
@@ -49,6 +51,7 @@ class ImplantsOptimizer implements IImplantsOptimizer {
         this.alternativeSolutionsExplored = 0;
         this.alternativeFailuresExplored = 0;
         this.withAdapsin = withAdapsin;
+        this.timeWasUp = false;
     }
 
     SetBestIfNeeded(config: IConfiguration): boolean {
@@ -109,31 +112,36 @@ class ImplantsOptimizer implements IImplantsOptimizer {
     ImproveBest(maxSeconds: number): void {
         this.startTime = Date.now();
         this.searchReports.push(new SearchReport(0, Date.now() - this.startTime, this.currentBestSolution.cost, this.currentBestSolution.essenceCost, searchReportEnum.SUCCESS, this.alternativeSolutionsExplored, this.alternativeFailuresExplored));
-        var timeLimit = this.startTime + maxSeconds * 1000;
-        while (Date.now() < timeLimit && this.ImproveBestOnce(timeLimit)) { }
+        this.timeLimit = this.startTime + maxSeconds * 1000;
+        while (!this.IsTimesUp() && this.ImproveBestOnce()) { }
     }
 
-    ImproveBestOnce(timeLimit: number): boolean {
+    ImproveBestOnce(): boolean {
         var foundSolution = true;
         var lastDepth = 0;
-        for (var depth = 0; foundSolution && Date.now() < timeLimit; depth++) {
+        for (var depth = 0; foundSolution && !this.IsTimesUp(); depth++) {
             lastDepth = depth;
-            var improve = this.ImproveBestOnceAtDepth(timeLimit, depth);
+            var improve = this.ImproveBestOnceAtDepth(depth);
             if (improve.bestSolutionImproved) {
                 this.searchReports.push(new SearchReport(depth, Date.now() - this.startTime, this.currentBestSolution.cost, this.currentBestSolution.essenceCost, searchReportEnum.SUCCESS, this.alternativeSolutionsExplored, this.alternativeFailuresExplored));
+                return true;
             }
             foundSolution = improve.solutionsFoundAtDepth;
         }
         var searchReportStatus = searchReportEnum.ABORTED;
-        if (!foundSolution) {
+        if (!this.timeWasUp) {
             searchReportStatus = searchReportEnum.FINISHED;
         }
         this.searchReports.push(new SearchReport(lastDepth, Date.now() - this.startTime, this.currentBestSolution.cost, this.currentBestSolution.essenceCost, searchReportStatus, this.alternativeSolutionsExplored, this.alternativeFailuresExplored));
-
         return false;
     }
 
-    ImproveBestOnceAtDepth(timeLimit: number, depth: number): ImprovementResult {
+    IsTimesUp() {
+        this.timeWasUp = Date.now() >= this.timeLimit;
+        return this.timeWasUp;
+    }
+
+    ImproveBestOnceAtDepth(depth: number): ImprovementResult {
         var currentBestConfig = this.currentBestSolution.config;
         var upgradedImplantReferences = currentBestConfig.GetUpgradedImplantReferences();
         var orderedImplantIndexes: number[] = [];
@@ -143,22 +151,22 @@ class ImplantsOptimizer implements IImplantsOptimizer {
         }
         var upgrades = currentBestConfig.upgrades;
         var downgrades: number[][] = [];
-        return this.ImproveConfigOnceAtDepth(timeLimit, depth, currentBestConfig, orderedImplantIndexes, [], 0);
+        return this.ImproveConfigOnceAtDepth(depth, currentBestConfig, orderedImplantIndexes, [], 0);
     }
 
-    ImproveConfigOnceAtDepth(timeLimit: number, depth: number, config: IConfiguration, orderedImplantIndexes: number[], fixedIndexes: UpgradeIdentifier[], currentIndex: number): ImprovementResult {
+    ImproveConfigOnceAtDepth(depth: number, config: IConfiguration, orderedImplantIndexes: number[], fixedIndexes: UpgradeIdentifier[], currentIndex: number): ImprovementResult {
         if (depth == 0) {
             return this.ImproveConfigOnce(depth, config, fixedIndexes);
         }
-        return this.ImproveConfigOnceAtPositiveDepth(timeLimit, depth, config, orderedImplantIndexes, fixedIndexes, currentIndex);
+        return this.ImproveConfigOnceAtPositiveDepth(depth, config, orderedImplantIndexes, fixedIndexes, currentIndex);
     }
 
-    ImproveConfigOnceAtPositiveDepth(timeLimit: number, depth: number, config: IConfiguration, orderedImplantIndexes: number[], fixedIndexes: UpgradeIdentifier[], currentIndex: number): ImprovementResult {
+    ImproveConfigOnceAtPositiveDepth(depth: number, config: IConfiguration, orderedImplantIndexes: number[], fixedIndexes: UpgradeIdentifier[], currentIndex: number): ImprovementResult {
         var result = new ImprovementResult(depth);
         var implantIndex = orderedImplantIndexes[currentIndex];
         var upgrades = config.upgrades[implantIndex];
         var previousUpgrade = 0;
-        for (var i = upgrades.length - 1; i >= 0 && Date.now() < timeLimit; i--) {
+        for (var i = upgrades.length - 1; i >= 0 && !this.IsTimesUp(); i--) {
             var upgrade = upgrades[i];
             if (upgrade <= previousUpgrade) {
                 continue;
@@ -166,14 +174,14 @@ class ImplantsOptimizer implements IImplantsOptimizer {
             previousUpgrade = upgrade;
             var downgradedConfig = new Configuration(false, config, implantIndex, i);
             var newFixedIndexes = this.AddToFixedIndexes(fixedIndexes, new UpgradeIdentifier(implantIndex, i));
-            var partialResult = this.ImproveConfigOnceAtDepth(timeLimit, depth - 1, downgradedConfig, orderedImplantIndexes, newFixedIndexes, currentIndex);
+            var partialResult = this.ImproveConfigOnceAtDepth(depth - 1, downgradedConfig, orderedImplantIndexes, newFixedIndexes, currentIndex);
             this.MergeResults(result, partialResult);
             if (result.bestSolutionImproved) {
                 return result;
             }
         }
-        if (currentIndex < orderedImplantIndexes.length - 1 && Date.now() < timeLimit) {
-            var furtherResult = this.ImproveConfigOnceAtPositiveDepth(timeLimit, depth, config, orderedImplantIndexes, fixedIndexes, currentIndex + 1);
+        if (currentIndex < orderedImplantIndexes.length - 1 && !this.IsTimesUp()) {
+            var furtherResult = this.ImproveConfigOnceAtPositiveDepth(depth, config, orderedImplantIndexes, fixedIndexes, currentIndex + 1);
             this.MergeResults(result, furtherResult);
         }
         return result;

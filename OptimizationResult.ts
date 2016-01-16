@@ -62,7 +62,7 @@ class OptimizationResult implements IOptimizationResult {
         if (this.withAdapsin) {
             totalBaseCost -= this.GetAdapsinCost(implants);
         }
-        this.costEfficiencyPercent = 100 * config.cost / totalBaseCost;
+        this.costEfficiencyPercent = Math.round(100 * config.cost / totalBaseCost);
 
         var gradeResults: IGradeResult[] = [];
         var upgrades = config.upgrades;
