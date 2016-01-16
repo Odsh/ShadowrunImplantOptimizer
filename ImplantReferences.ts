@@ -1,5 +1,9 @@
 /// <reference path="ImplantReference.ts" />
 
+function CreateImplantReferences() {
+    return new ImplantReferences();
+}
+
 interface IImplantReferencesProvider {
     GetImplants(): IImplantReferences[];
 }

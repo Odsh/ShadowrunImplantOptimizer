@@ -3,6 +3,14 @@
 /// <reference path="ImplantType.ts" />
 /// <reference path="AllowedGradesFactory.ts" />
 
+function CreateImplantReference(row: number, name: string, essence: number, availability: number, cost: number, type: implantTypesEnum, cultured: boolean, allowedGradesFactory: IAllowedGradesFactory, minEssence: number, maxAvailability: number) {
+    return new ImplantReference(row, name, essence, availability, cost, type, cultured, allowedGradesFactory, minEssence, maxAvailability);
+}
+
+function CreateSubImplantReference(row: number, container: string, availability: number, cost: number) {
+    return new SubImplantReference(row, container, availability, cost);
+}
+
 interface ISubImplantReference {
     row: number;
     container: string;
