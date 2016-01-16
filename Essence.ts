@@ -84,9 +84,15 @@ var sixEssence = new EssenceLoss(6);
 function EssenceNumeratorToString(numerator: number): string {
     var remainder = numerator % essencePrecision;
     var remainderString = remainder.toString();
+    var zerosToAdd = essencePrecision.toString().length - remainderString.length - 1;
     while (remainderString.charAt(remainderString.length - 1) == "0") {
-        remainderString = remainderString.slice(0, -1)
+        remainderString = remainderString.slice(0, -1);
     }
+    var prefix = "";
+    for (var i = 0; i < zerosToAdd; i++) {
+        prefix += "0";
+    }
+    remainderString = prefix + remainderString;
     var integerValue = (numerator - remainder) / essencePrecision;
     return integerValue.toString() + "." + remainderString;
 }

@@ -16,6 +16,7 @@ interface IOptimizationResult {
     cost: number;
     qualityCost: number;
     essenceCost: IEssenceLoss;
+    remainingEssenceString: string;
     costEfficiencyPercent: number;
     biocompatibility: biocompatibilityEnum;
     withPrototype: boolean;
@@ -28,6 +29,7 @@ class OptimizationResult implements IOptimizationResult {
     result: optimizationResultEnum;
     cost: number;
     essenceCost: IEssenceLoss;
+    remainingEssenceString: string;
     qualityCost: number;
     costEfficiencyPercent: number;
     biocompatibility: biocompatibilityEnum;
@@ -52,6 +54,9 @@ class OptimizationResult implements IOptimizationResult {
         this.cost = config.cost;
         this.qualityCost = config.qualityCost;
         this.essenceCost = config.RealEssenceUsed();
+
+        this.remainingEssenceString = sixEssence.Subtract(this.essenceCost).ToString();
+
         var totalBaseCost = config.implantReferences.totalBaseCost;
         var implants = config.implantReferences.implants;
         if (this.withAdapsin) {
