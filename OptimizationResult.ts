@@ -24,6 +24,7 @@ interface IOptimizationResult {
     withAdapsin: boolean;
     grades: string[];
     searchReports: SearchReport[];
+    fullResults: IOptimizationResult[];
 }
 
 class OptimizationResult implements IOptimizationResult {
@@ -40,9 +41,11 @@ class OptimizationResult implements IOptimizationResult {
     withAdapsin: boolean;
     grades: string[];
     searchReports: SearchReport[];
+    fullResults: IOptimizationResult[];
 
     constructor(currentBest: ICurrentBest, searchReports: SearchReport[]) {
         this.searchReports = searchReports;
+        this.fullResults = [];
 
         if (currentBest == null) {
             this.result = optimizationResultEnum.FAILED;

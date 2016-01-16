@@ -57,7 +57,9 @@ function OptimizeGrades(maxSeconds: number, references: IImplantReferences, minE
         results.push(optimizers[i].Optimize(maxSecondsPerOptimizer));
     }
     results.sort(ResultComparer);
-    return results[0];
+    var bestResult = results[0];
+    bestResult.fullResults = results;
+    return bestResult;
 }
 
 function ContainsAdapsin(implants: IImplantReference[], adapsinName: string): boolean {
